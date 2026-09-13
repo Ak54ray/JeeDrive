@@ -298,7 +298,7 @@ function renderHeader() {
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         
         <!-- Secret 5-Click Logo Access -->
-        <a href="#" onclick="event.preventDefault(); window.handleLogoClick();" class="flex items-center group cursor-pointer select-none" title="Click 5 times for Secret Admin Access">
+        <a href="#" onclick="event.preventDefault(); window.handleLogoClick();" class="flex items-center group cursor-pointer select-none">
           <img src="./assets/logo.png" alt="JEE DRIVE - Your Drive Our Priority" class="h-10 lg:h-12 w-auto object-contain transition-transform group-hover:scale-105">
         </a>
 
