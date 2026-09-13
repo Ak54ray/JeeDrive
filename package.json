@@ -1,0 +1,12 @@
+{
+  "name": "drivemate-web-admin",
+  "version": "2.0.0",
+  "description": "DriveMate Public Website & Secure Admin Panel",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 3000"
+  },
+  "keywords": ["drivemate", "chauffeur", "on-demand-drivers", "bengaluru"],
+  "author": "DriveMate Team",
+  "license": "MIT"
+}

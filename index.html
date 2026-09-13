@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JeeDrive - Professional, On-Demand Chauffeurs and Drivers in Bengaluru. Transparent pricing for car owners.">
+  <!-- Favicon Logo -->
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cream: '#FFF9F5',
+              soft: '#FFF2E8',
+              navy: '#0A1329',
+              blue: '#0556F3',
+              orange: '#F58220'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body class="bg-[#FFF9F5] text-[#0A1329] font-sans antialiased selection:bg-[#0556F3] selection:text-white">
+
+  <!-- Root App Shell -->
+  <div id="app"></div>
+
+  <!-- Main JavaScript App -->
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
+
