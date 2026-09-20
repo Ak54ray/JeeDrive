@@ -161,6 +161,8 @@ async function handleAddRecord(e) {
         state.isSaving = false;
         renderApp();
         return;
+      } else {
+        payload[col.name] = null;
       }
     } else if (col.type === 'json') {
       const val = formData.get(col.name);
@@ -173,16 +175,35 @@ async function handleAddRecord(e) {
           renderApp();
           return;
         }
+      } else {
+        payload[col.name] = null;
       }
     } else {
       const val = formData.get(col.name);
-      if (val !== null && val !== '') {
-        payload[col.name] = val;
+      if (val !== null && val.trim() !== '') {
+        payload[col.name] = val.trim();
       } else if (col.isRequired) {
         state.modalFormError = `Field "${col.label}" is required.`;
         state.isSaving = false;
         renderApp();
         return;
+      } else {
+        payload[col.name] = null;
+      }
+    }
+  }
+
+  // Driver Profile Approval Special Handler for Insert
+  if (tableConfig.dbTable === 'driver_profiles') {
+    const isApproved = payload.status === 'APPROVED' || payload.application_status === 'APPROVED';
+    if (isApproved) {
+      payload.status = 'APPROVED';
+      payload.application_status = 'APPROVED';
+      if (!payload.approved_at) {
+        payload.approved_at = new Date().toISOString();
+      }
+      if (!payload.approved_by) {
+        payload.approved_by = state.adminAuth.userEmail || 'NeemBaba';
       }
     }
   }
@@ -225,6 +246,13 @@ async function handleEditRecord(e) {
       const val = formData.get(col.name);
       if (val !== null && val !== '') {
         patchData[col.name] = Number(val);
+      } else if (col.isRequired) {
+        state.modalFormError = `Field "${col.label}" is required.`;
+        state.isSaving = false;
+        renderApp();
+        return;
+      } else {
+        patchData[col.name] = null;
       }
     } else if (col.type === 'json') {
       const val = formData.get(col.name);
@@ -237,17 +265,42 @@ async function handleEditRecord(e) {
           renderApp();
           return;
         }
+      } else {
+        patchData[col.name] = null;
       }
     } else {
       const val = formData.get(col.name);
-      if (val !== null) {
-        patchData[col.name] = val;
+      if (val !== null && val.trim() !== '') {
+        patchData[col.name] = val.trim();
+      } else if (col.isRequired) {
+        state.modalFormError = `Field "${col.label}" is required.`;
+        state.isSaving = false;
+        renderApp();
+        return;
+      } else {
+        patchData[col.name] = null;
       }
     }
   }
 
   if (tableConfig.columns.some(c => c.name === 'updated_at')) {
     patchData.updated_at = new Date().toISOString();
+  }
+
+  // Driver Profile Approval Special Handler:
+  // If status or application_status is set to APPROVED, populate approved_at and approved_by automatically if not already set.
+  if (tableConfig.dbTable === 'driver_profiles') {
+    const isApproved = patchData.status === 'APPROVED' || patchData.application_status === 'APPROVED';
+    if (isApproved) {
+      patchData.status = 'APPROVED';
+      patchData.application_status = 'APPROVED';
+      if (!patchData.approved_at) {
+        patchData.approved_at = new Date().toISOString();
+      }
+      if (!patchData.approved_by) {
+        patchData.approved_by = state.adminAuth.userEmail || 'NeemBaba';
+      }
+    }
   }
 
   try {
@@ -927,6 +980,13 @@ function renderAdminPanel() {
                       `;
   }).join('')}
                     <td class="py-3 px-4 text-right whitespace-nowrap space-x-1.5">
+                      ${currentTable.dbTable === 'driver_profiles' && record.status !== 'APPROVED' ? `
+                        <button onclick="window.approveDriverProfile('${escapeAttr(record[currentTable.primaryKey])}');"
+                          class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/40 text-[11px] font-bold transition-colors">
+                          ✓ Quick Approve
+                        </button>
+                      ` : ''}
+
                       <button onclick="window.openViewModal('${escapeAttr(record[currentTable.primaryKey])}');"
                         class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700 text-[11px] font-medium transition-colors">
                         👁 View
@@ -1610,6 +1670,31 @@ window.openDeleteModal = function (idVal) {
   const record = (state.tablesData[state.activeTableId] || []).find(r => String(r[tableConfig.primaryKey]) === String(idVal));
   if (record) {
     state.deleteModalRecord = record;
+    renderApp();
+  }
+};
+
+window.approveDriverProfile = async function (idVal) {
+  const tableConfig = TABLES_REGISTRY.find(t => t.id === 'driver_profiles');
+  if (!tableConfig) return;
+  state.isSaving = true;
+  renderApp();
+  try {
+    const patchData = {
+      status: 'APPROVED',
+      application_status: 'APPROVED',
+      approved_at: new Date().toISOString(),
+      approved_by: state.adminAuth.userEmail || 'NeemBaba',
+      updated_at: new Date().toISOString()
+    };
+    await updateTableRecord('driver_profiles', tableConfig.primaryKey, idVal, patchData);
+    showToast('Driver profile approved successfully! Status set to APPROVED.', 'success');
+    await logAdminAction(state.adminAuth.userEmail, 'APPROVE_DRIVER_PROFILE', idVal, patchData);
+    await loadActiveTableData(true);
+  } catch (err) {
+    showToast(`Approval failed: ${err.message}`, 'danger');
+  } finally {
+    state.isSaving = false;
     renderApp();
   }
 };
