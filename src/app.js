@@ -26,6 +26,7 @@ const TABLE_ICONS = {
 // Application State
 const state = {
   currentView: 'website', // 'website', 'admin_login', 'admin_panel'
+  websitePage: 'overview', // 'overview', 'how-it-works', 'benefits', 'trip-types', 'become-a-driver', 'privacy-policy'
   activeTableId: 'dashboard', // Default to Dashboard section
   tablesData: {}, // Cached records per table
   tablesCounts: {}, // Record counts
@@ -346,23 +347,38 @@ async function confirmDeleteRecord() {
 
 function renderHeader() {
   const isAuth = state.adminAuth.isAuthenticated;
+  const activePage = state.websitePage;
+
+  const navLinks = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'how-it-works', label: 'How It Works' },
+    { id: 'benefits', label: 'Benefits' },
+    { id: 'trip-types', label: 'Trip Types' },
+    { id: 'become-a-driver', label: 'Become a Driver' },
+  ];
+
   return `
     <header class="glass-nav sticky top-0 z-40 px-4 lg:px-8 py-3 transition-all border-b border-[#F5E6DA]/90 bg-[#FFF9F5]/95 backdrop-blur-md shadow-sm">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         
-        <!-- Secret 5-Click Logo Access -->
+        <!-- Logo (5-click secret admin access) -->
         <a href="#" onclick="event.preventDefault(); window.handleLogoClick();" class="flex items-center group cursor-pointer select-none">
           <img src="./assets/logo.png" alt="JEE DRIVE - Your Drive Our Priority" class="h-10 lg:h-12 w-auto object-contain transition-transform group-hover:scale-105">
         </a>
 
-        <!-- Public Nav links (when on website view) -->
+        <!-- Public Nav links with active page highlighting -->
         ${state.currentView === 'website' ? `
-          <nav class="hidden md:flex items-center gap-7 font-semibold text-xs text-[#0A1329]">
-            <a href="#overview" class="hover:text-[#0556F3] transition-colors">Overview</a>
-            <a href="#how-it-works" class="hover:text-[#0556F3] transition-colors">How It Works</a>
-            <a href="#benefits" class="hover:text-[#0556F3] transition-colors">Benefits</a>
-            <a href="#trip-types" class="hover:text-[#0556F3] transition-colors">Trip Types</a>
-            <a href="#driver-registration" class="hover:text-[#0556F3] transition-colors">Become a Driver</a>
+          <nav class="hidden md:flex items-center gap-1 font-semibold text-xs text-[#0A1329]">
+            ${navLinks.map(link => `
+              <a href="#" onclick="event.preventDefault(); window.navigateToPage('${link.id}');"
+                class="px-3 py-2 rounded-lg transition-all ${
+                  activePage === link.id
+                    ? 'bg-[#0556F3] text-white shadow-sm'
+                    : 'text-[#0A1329] hover:bg-[#F0F5FF] hover:text-[#0556F3]'
+                }">
+                ${link.label}
+              </a>
+            `).join('')}
           </nav>
         ` : `
           <div class="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-400">
@@ -402,11 +418,37 @@ function renderHeader() {
   `;
 }
 
-// Clean Public Website View (Warm Cream, Dark Navy, JeeDrive Blue & Subtle Orange Palette)
-function renderPublicWebsite() {
+
+// Shared Footer for all public pages
+function renderPublicFooter() {
   return `
-    <!-- Hero / Overview Section -->
-    <section id="overview" class="relative pt-12 pb-20 md:pt-16 md:pb-28 bg-gradient-to-b from-[#FFF5EC] via-[#FFF9F5] to-[#FEF6EF] overflow-hidden border-b border-[#F5E6DA]">
+    <footer class="border-t border-[#1E293B] bg-[#0A1329] py-10 text-xs text-slate-400">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <img src="./assets/logo.png" alt="JEE DRIVE" class="h-9 w-auto object-contain bg-white p-1 rounded-md">
+          <span>© 2026 JEE DRIVE Bengaluru. All rights reserved.</span>
+        </div>
+        <div class="flex items-center gap-5">
+          <a href="privacy-policy.html" onclick="event.preventDefault(); window.navigateToPage('privacy-policy');" class="text-slate-400 hover:text-white transition-colors underline underline-offset-2 cursor-pointer">Privacy Policy</a>
+          <span class="text-slate-300 font-semibold tracking-wide">Your Drive Our Priority</span>
+          <a href="tel:${SUPPORT_PHONE_NUMBER}" class="support-call-btn" aria-label="Call Support" title="Call Support">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
+// ─────────────────────────────────────────────────
+// PAGE: OVERVIEW (Home)
+// ─────────────────────────────────────────────────
+function renderPageOverview() {
+  return `
+    <section class="relative pt-12 pb-20 md:pt-16 md:pb-28 bg-gradient-to-b from-[#FFF5EC] via-[#FFF9F5] to-[#FEF6EF] overflow-hidden border-b border-[#F5E6DA]">
       <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div class="lg:col-span-7 space-y-6">
@@ -421,9 +463,9 @@ function renderPublicWebsite() {
               JeeDrive connects vehicle owners with background-verified, experienced chauffeurs in Bengaluru. Enjoy smooth city rides, airport drops, and outstation trips with complete peace of mind.
             </p>
             <div class="flex flex-wrap gap-4 pt-2">
-              <a href="#how-it-works" class="btn-orange text-xs py-3 px-6 shadow-xl shadow-orange-500/20">
+              <button onclick="window.navigateToPage('how-it-works')" class="btn-orange text-xs py-3 px-6 shadow-xl shadow-orange-500/20">
                 ⚡ Explore How It Works
-              </a>
+              </button>
               <a href="tel:${SUPPORT_PHONE_NUMBER}" class="btn-secondary text-xs py-3 px-5">
                 📞 Call JeeDrive Support
               </a>
@@ -434,7 +476,7 @@ function renderPublicWebsite() {
               <img src="./assets/logo.png" alt="JEE DRIVE - Your Drive Our Priority" class="w-full max-h-56 object-contain rounded-xl mb-4 p-4 bg-white border border-[#F5E6DA] shadow-inner">
               <div class="p-4 bg-[#F0F5FF] rounded-xl border border-[#D0E0FF] text-left text-xs space-y-2.5 text-[#3B4758]">
                 <div class="text-[#0556F3] font-bold flex items-center gap-1.5">
-                  <span>✓</span> Manual & Automatic Vehicles Supported
+                  <span>✓</span> Manual &amp; Automatic Vehicles Supported
                 </div>
                 <div>Available across all Bengaluru localities: Indiranagar, Koramangala, Whitefield, Jayanagar, Hoskote, and Airport routes.</div>
               </div>
@@ -444,139 +486,516 @@ function renderPublicWebsite() {
       </div>
     </section>
 
-    <!-- How it works -->
-    <section id="how-it-works" class="py-16 md:py-24 bg-[#FFF2E8] border-b border-[#F5E6DA]">
-      <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
-        <h2 class="text-2xl md:text-4xl font-extrabold text-[#0A1329] mb-3">How JeeDrive <span class="gradient-text">Works</span></h2>
-        <p class="text-[#3B4758] text-xs md:text-sm font-medium mb-12">4 easy steps for car owners and driver partners</p>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
-          <div class="glass-panel p-6 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#F58220]/40 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl">
-            <div class="text-[#0556F3] font-black text-2xl mb-2">01</div>
-            <h3 class="text-base font-bold text-[#0A1329] mb-1.5">Select Trip Type</h3>
-            <p class="text-xs text-[#3B4758] leading-relaxed">Choose One-Way, Round Trip, Airport, Outstation, or Home Ride.</p>
-          </div>
-          <div class="glass-panel p-6 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#F58220]/40 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl">
-            <div class="text-[#0556F3] font-black text-2xl mb-2">02</div>
-            <h3 class="text-base font-bold text-[#0A1329] mb-1.5">Verified Driver Match</h3>
-            <p class="text-xs text-[#3B4758] leading-relaxed">JeeDrive assigns a nearby vetted chauffeur suited to your transmission.</p>
-          </div>
-          <div class="glass-panel p-6 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#F58220]/40 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl">
-            <div class="text-[#0556F3] font-black text-2xl mb-2">03</div>
-            <h3 class="text-base font-bold text-[#0A1329] mb-1.5">Enjoy The Ride</h3>
-            <p class="text-xs text-[#3B4758] leading-relaxed">Sit back in your personal car while our experienced driver steers.</p>
-          </div>
-          <div class="glass-panel p-6 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#F58220]/40 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl">
-            <div class="text-[#F58220] font-black text-2xl mb-2">04</div>
-            <h3 class="text-base font-bold text-[#0A1329] mb-1.5">Transparent Fare</h3>
-            <p class="text-xs text-[#3B4758] leading-relaxed">Pay the calculated fare directly based on verified pricing rules.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Benefits -->
-    <section id="benefits" class="py-16 md:py-24 bg-[#FFF9F5] border-b border-[#F5E6DA]">
+    <!-- Quick Navigation Cards -->
+    <section class="py-14 bg-[#FFF9F5] border-b border-[#F5E6DA]">
       <div class="max-w-7xl mx-auto px-4 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="glass-panel p-8 border-[#0556F3]/20 bg-[#F0F5FF]/80 rounded-2xl shadow-sm space-y-4 hover:shadow-md transition-all">
-            <span class="text-xs font-extrabold text-[#0556F3] uppercase tracking-wider">For Car Owners</span>
-            <h3 class="text-2xl font-extrabold text-[#0A1329]">Why Car Owners Choose JeeDrive</h3>
-            <ul class="space-y-3 text-xs md:text-sm text-[#3B4758] font-medium">
-              <li class="flex items-center gap-2"><span class="text-[#0556F3] font-bold">✓</span> Background-verified drivers with Aadhaar, PAN, and DL checks</li>
-              <li class="flex items-center gap-2"><span class="text-[#0556F3] font-bold">✓</span> Manual, Automatic, Luxury & SUV vehicle versatility</li>
-              <li class="flex items-center gap-2"><span class="text-[#0556F3] font-bold">✓</span> Upfront pricing rules with zero hidden extras</li>
-            </ul>
-          </div>
-          <div class="glass-panel p-8 border-[#F58220]/20 bg-[#FFF3E8]/80 rounded-2xl shadow-sm space-y-4 hover:shadow-md transition-all">
-            <span class="text-xs font-extrabold text-[#F58220] uppercase tracking-wider">For Driver Partners</span>
-            <h3 class="text-2xl font-extrabold text-[#0A1329]">Empowering Professional Chauffeurs</h3>
-            <ul class="space-y-3 text-xs md:text-sm text-[#3B4758] font-medium">
-              <li class="flex items-center gap-2"><span class="text-[#F58220] font-bold">★</span> Verified Driver ID generated on admin approval</li>
-              <li class="flex items-center gap-2"><span class="text-[#F58220] font-bold">★</span> Duty preferences: Airport, Outstation, and Home Ride support</li>
-              <li class="flex items-center gap-2"><span class="text-[#F58220] font-bold">★</span> Fast mobile application registration & approval</li>
-            </ul>
-          </div>
+        <h2 class="text-xl font-extrabold text-[#0A1329] mb-6 text-center">Explore <span class="gradient-text">JeeDrive</span></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          <button onclick="window.navigateToPage('how-it-works')" class="glass-panel p-6 text-left hover:border-[#0556F3]/30 hover:shadow-lg transition-all group cursor-pointer w-full">
+            <div class="text-2xl mb-3">⚙️</div>
+            <div class="font-bold text-[#0A1329] text-sm group-hover:text-[#0556F3] transition-colors">How It Works</div>
+            <div class="text-xs text-[#3B4758] mt-1">4 simple steps to book a driver</div>
+          </button>
+          <button onclick="window.navigateToPage('benefits')" class="glass-panel p-6 text-left hover:border-[#0556F3]/30 hover:shadow-lg transition-all group cursor-pointer w-full">
+            <div class="text-2xl mb-3">✅</div>
+            <div class="font-bold text-[#0A1329] text-sm group-hover:text-[#0556F3] transition-colors">Benefits</div>
+            <div class="text-xs text-[#3B4758] mt-1">Why owners &amp; drivers love JeeDrive</div>
+          </button>
+          <button onclick="window.navigateToPage('trip-types')" class="glass-panel p-6 text-left hover:border-[#F58220]/30 hover:shadow-lg transition-all group cursor-pointer w-full">
+            <div class="text-2xl mb-3">🗺️</div>
+            <div class="font-bold text-[#0A1329] text-sm group-hover:text-[#F58220] transition-colors">Trip Types</div>
+            <div class="text-xs text-[#3B4758] mt-1">Airport, outstation &amp; more</div>
+          </button>
+          <button onclick="window.navigateToPage('become-a-driver')" class="glass-panel p-6 text-left hover:border-[#F58220]/30 hover:shadow-lg transition-all group cursor-pointer w-full">
+            <div class="text-2xl mb-3">🚘</div>
+            <div class="font-bold text-[#0A1329] text-sm group-hover:text-[#F58220] transition-colors">Become a Driver</div>
+            <div class="text-xs text-[#3B4758] mt-1">Join the JeeDrive network</div>
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- Trip Types -->
-    <section id="trip-types" class="py-16 md:py-24 bg-[#FFF2E8] border-b border-[#F5E6DA]">
-      <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
-        <h2 class="text-2xl md:text-4xl font-extrabold text-[#0A1329] mb-3">Available <span class="gradient-text">Trip Types</span></h2>
-        <p class="text-[#3B4758] text-xs md:text-sm font-medium mb-10">Supported across Bengaluru and Outstation routes</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5 text-center">
-          <div class="glass-panel p-5 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#0556F3]/40 shadow-sm hover:shadow-md transition-all rounded-2xl">
-            <div class="text-[#0556F3] font-extrabold text-xl mb-1.5">→</div>
-            <div class="text-sm font-bold text-[#0A1329]">One Way</div>
-            <div class="text-[11px] text-[#3B4758] mt-1">Point-to-point within Bengaluru</div>
-          </div>
-          <div class="glass-panel p-5 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#0556F3]/40 shadow-sm hover:shadow-md transition-all rounded-2xl">
-            <div class="text-[#0556F3] font-extrabold text-xl mb-1.5">⇄</div>
-            <div class="text-sm font-bold text-[#0A1329]">Round Trip</div>
-            <div class="text-[11px] text-[#3B4758] mt-1">Return trips & multi-stop duties</div>
-          </div>
-          <div class="glass-panel p-5 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#0556F3]/40 shadow-sm hover:shadow-md transition-all rounded-2xl">
-            <div class="text-[#0556F3] font-extrabold text-xl mb-1.5">✈</div>
-            <div class="text-sm font-bold text-[#0A1329]">Airport</div>
-            <div class="text-[11px] text-[#3B4758] mt-1">Dedicated Kempegowda BLR transfers</div>
-          </div>
-          <div class="glass-panel p-5 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#F58220]/40 shadow-sm hover:shadow-md transition-all rounded-2xl">
-            <div class="text-[#F58220] font-extrabold text-xl mb-1.5">🏞</div>
-            <div class="text-sm font-bold text-[#0A1329]">Outstation</div>
-            <div class="text-[11px] text-[#3B4758] mt-1">Same-day & highway trips</div>
-          </div>
-          <div class="glass-panel p-5 border-[#FCE8D8] bg-white/80 hover:bg-white hover:border-[#F58220]/40 shadow-sm hover:shadow-md transition-all rounded-2xl">
-            <div class="text-[#F58220] font-extrabold text-xl mb-1.5">🏠</div>
-            <div class="text-sm font-bold text-[#0A1329]">Home Ride</div>
-            <div class="text-[11px] text-[#3B4758] mt-1">Safe late-night home drop preferences</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Driver Registration Section -->
-    <section id="driver-registration" class="py-16 md:py-24 bg-[#FFF9F5]">
-      <div class="max-w-4xl mx-auto px-4 text-center">
-        <div class="glass-panel p-10 max-w-4xl mx-auto border-[#0556F3]/15 bg-white/90 shadow-xl rounded-3xl space-y-5 text-center">
-          <h2 class="text-2xl md:text-3xl font-extrabold text-[#0A1329]">Driver Registration Process</h2>
-          <p class="text-xs md:text-sm text-[#3B4758] max-w-xl mx-auto font-medium leading-relaxed">
-            Drivers register through the <strong>JeeDrive Mobile App</strong>. All driver profiles and identity documents are reviewed by Admins in the Supabase schema database before activation.
-          </p>
-          <div class="flex items-center justify-center gap-3 pt-3">
-            <a href="tel:${SUPPORT_PHONE_NUMBER}" class="support-call-btn" aria-label="Call Driver Helpdesk" title="Call Driver Helpdesk">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-              </svg>
-            </a>
-            <span class="text-xs md:text-sm text-[#0A1329] font-semibold">Tap phone icon to call Driver Helpdesk</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="border-t border-[#1E293B] bg-[#0A1329] py-10 text-xs text-slate-400">
-      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div class="flex items-center gap-3">
-          <img src="./assets/logo.png" alt="JEE DRIVE" class="h-9 w-auto object-contain bg-white p-1 rounded-md">
-          <span>© 2026 JEE DRIVE Bengaluru. All rights reserved.</span>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="text-slate-300 font-semibold tracking-wide">Your Drive Our Priority</span>
-          <a href="tel:${SUPPORT_PHONE_NUMBER}" class="support-call-btn" aria-label="Call Support" title="Call Support">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </footer>
+    ${renderPublicFooter()}
   `;
 }
 
+// ─────────────────────────────────────────────────
+// PAGE: HOW IT WORKS
+// ─────────────────────────────────────────────────
+function renderPageHowItWorks() {
+  return `
+    <section class="pt-12 pb-10 bg-gradient-to-b from-[#FFF5EC] to-[#FFF9F5] border-b border-[#F5E6DA]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F0F5FF] border border-[#C7DEFF] text-[#0556F3] text-xs font-bold mb-4">
+          ⚙️ Simple Process
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-[#0A1329] mb-4">
+          How JeeDrive <span class="gradient-text">Works</span>
+        </h1>
+        <p class="text-[#3B4758] text-sm md:text-base font-medium max-w-2xl mx-auto">
+          Booking a professional chauffeur for your own car has never been easier. Follow these 4 simple steps.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 bg-[#FFF2E8]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          <div class="glass-panel p-8 border-[#FCE8D8] bg-white hover:border-[#0556F3]/30 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl flex gap-6 items-start">
+            <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-[#F0F5FF] border border-[#C7DEFF] flex items-center justify-center">
+              <span class="text-[#0556F3] font-black text-2xl">01</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-[#0A1329] mb-2">Select Your Trip Type</h3>
+              <p class="text-sm text-[#3B4758] leading-relaxed">Open the JeeDrive app and choose from One-Way, Round Trip, Airport Drop, Outstation, or Home Ride based on your travel need.</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-8 border-[#FCE8D8] bg-white hover:border-[#0556F3]/30 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl flex gap-6 items-start">
+            <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-[#F0F5FF] border border-[#C7DEFF] flex items-center justify-center">
+              <span class="text-[#0556F3] font-black text-2xl">02</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-[#0A1329] mb-2">Get Matched with a Verified Driver</h3>
+              <p class="text-sm text-[#3B4758] leading-relaxed">JeeDrive's matching system connects you with a nearby, background-verified chauffeur experienced with your vehicle transmission type.</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-8 border-[#FCE8D8] bg-white hover:border-[#F58220]/30 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl flex gap-6 items-start">
+            <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-[#FFF0E5] border border-[#FCD5B5] flex items-center justify-center">
+              <span class="text-[#F58220] font-black text-2xl">03</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-[#0A1329] mb-2">Relax &amp; Enjoy the Journey</h3>
+              <p class="text-sm text-[#3B4758] leading-relaxed">Sit back comfortably in your own car while our professional driver takes the wheel. Track your ride in real-time via the app.</p>
+            </div>
+          </div>
+
+          <div class="glass-panel p-8 border-[#FCE8D8] bg-white hover:border-[#F58220]/30 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl flex gap-6 items-start">
+            <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-[#FFF0E5] border border-[#FCD5B5] flex items-center justify-center">
+              <span class="text-[#F58220] font-black text-2xl">04</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-[#0A1329] mb-2">Pay Transparently</h3>
+              <p class="text-sm text-[#3B4758] leading-relaxed">Pay the pre-calculated fare directly. No hidden charges, no surge pricing surprises — just honest, upfront pricing based on distance and trip type.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-12 text-center">
+          <button onclick="window.navigateToPage('become-a-driver')" class="btn-orange text-sm py-3 px-8 shadow-xl shadow-orange-500/20">
+            🚘 Interested in Driving? Join JeeDrive
+          </button>
+        </div>
+      </div>
+    </section>
+
+    ${renderPublicFooter()}
+  `;
+}
+
+// ─────────────────────────────────────────────────
+// PAGE: BENEFITS
+// ─────────────────────────────────────────────────
+function renderPageBenefits() {
+  return `
+    <section class="pt-12 pb-10 bg-gradient-to-b from-[#FFF5EC] to-[#FFF9F5] border-b border-[#F5E6DA]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F0FFF4] border border-[#A7F3D0] text-[#059669] text-xs font-bold mb-4">
+          ✅ Why JeeDrive
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-[#0A1329] mb-4">
+          Benefits of <span class="gradient-text">JeeDrive</span>
+        </h1>
+        <p class="text-[#3B4758] text-sm md:text-base font-medium max-w-2xl mx-auto">
+          Discover why thousands of car owners and professional drivers across Bengaluru choose JeeDrive.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 bg-[#FFF9F5]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8 space-y-12">
+
+        <div class="glass-panel p-8 md:p-12 border-[#0556F3]/20 bg-[#F0F5FF]/60 rounded-3xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+            <div>
+              <span class="text-xs font-extrabold text-[#0556F3] uppercase tracking-wider">For Car Owners</span>
+              <h2 class="text-2xl md:text-3xl font-extrabold text-[#0A1329] mt-2 mb-4">Why Car Owners Choose JeeDrive</h2>
+              <p class="text-sm text-[#3B4758] leading-relaxed">JeeDrive takes the stress out of driving by connecting you with trustworthy, fully vetted chauffeurs ready to drive your own vehicle wherever you need to go.</p>
+            </div>
+            <ul class="space-y-4">
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#D0E0FF] shadow-sm">
+                <span class="text-[#0556F3] font-black text-lg mt-0.5">✓</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Aadhaar, PAN &amp; DL Verified</div><div class="text-xs text-[#3B4758] mt-1">Every driver partner undergoes rigorous identity verification before activation.</div></div>
+              </li>
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#D0E0FF] shadow-sm">
+                <span class="text-[#0556F3] font-black text-lg mt-0.5">✓</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Manual &amp; Automatic Expertise</div><div class="text-xs text-[#3B4758] mt-1">Drivers are matched based on your vehicle transmission type for confident handling.</div></div>
+              </li>
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#D0E0FF] shadow-sm">
+                <span class="text-[#0556F3] font-black text-lg mt-0.5">✓</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Zero Hidden Costs</div><div class="text-xs text-[#3B4758] mt-1">Upfront, transparent pricing with no surprise charges at the end of your ride.</div></div>
+              </li>
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#D0E0FF] shadow-sm">
+                <span class="text-[#0556F3] font-black text-lg mt-0.5">✓</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Luxury, SUV &amp; Compact Supported</div><div class="text-xs text-[#3B4758] mt-1">We cover all vehicle categories from hatchbacks to luxury SUVs.</div></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="glass-panel p-8 md:p-12 border-[#F58220]/20 bg-[#FFF3E8]/60 rounded-3xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+            <div>
+              <span class="text-xs font-extrabold text-[#F58220] uppercase tracking-wider">For Driver Partners</span>
+              <h2 class="text-2xl md:text-3xl font-extrabold text-[#0A1329] mt-2 mb-4">Empowering Professional Chauffeurs</h2>
+              <p class="text-sm text-[#3B4758] leading-relaxed">JeeDrive empowers experienced drivers with a trusted platform, steady ride opportunities, and a streamlined registration process.</p>
+            </div>
+            <ul class="space-y-4">
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#FCD5B5] shadow-sm">
+                <span class="text-[#F58220] font-black text-lg mt-0.5">★</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Official Driver ID on Approval</div><div class="text-xs text-[#3B4758] mt-1">Receive a verified JeeDrive Driver ID upon admin approval of your profile.</div></div>
+              </li>
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#FCD5B5] shadow-sm">
+                <span class="text-[#F58220] font-black text-lg mt-0.5">★</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Flexible Duty Preferences</div><div class="text-xs text-[#3B4758] mt-1">Set preferences for Airport runs, Outstation journeys, Home Rides, or all types.</div></div>
+              </li>
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#FCD5B5] shadow-sm">
+                <span class="text-[#F58220] font-black text-lg mt-0.5">★</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Fast Mobile App Registration</div><div class="text-xs text-[#3B4758] mt-1">Register your profile and upload documents entirely through the JeeDrive mobile app.</div></div>
+              </li>
+              <li class="flex items-start gap-3 p-4 bg-white rounded-xl border border-[#FCD5B5] shadow-sm">
+                <span class="text-[#F58220] font-black text-lg mt-0.5">★</span>
+                <div><div class="font-bold text-[#0A1329] text-sm">Transparent Earnings</div><div class="text-xs text-[#3B4758] mt-1">Understand exactly what you earn per trip with our clear pricing structure.</div></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    ${renderPublicFooter()}
+  `;
+}
+
+// ─────────────────────────────────────────────────
+// PAGE: TRIP TYPES
+// ─────────────────────────────────────────────────
+function renderPageTripTypes() {
+  const trips = [
+    { icon: '→', color: '#0556F3', bg: '#F0F5FF', border: '#C7DEFF', name: 'One Way', tagline: 'Point-to-point within Bengaluru', desc: 'Need to travel from one part of Bengaluru to another? Our One-Way rides offer efficient, no-frills transport for your daily needs — office, shopping, appointments and more.' },
+    { icon: '⇄', color: '#0556F3', bg: '#F0F5FF', border: '#C7DEFF', name: 'Round Trip', tagline: 'Return trips &amp; multi-stop duties', desc: 'Planning a round trip or multiple stops? Our chauffeurs will wait and return with you, ensuring you have a reliable driver throughout the entire journey.' },
+    { icon: '✈', color: '#0556F3', bg: '#F0F5FF', border: '#C7DEFF', name: 'Airport Transfer', tagline: 'Dedicated Kempegowda BLR transfers', desc: 'Catch your flight stress-free with our punctual Airport Transfer service. Our drivers are trained for terminal navigation at Kempegowda International Airport, BLR.' },
+    { icon: '🏞', color: '#F58220', bg: '#FFF0E5', border: '#FCD5B5', name: 'Outstation', tagline: 'Same-day &amp; highway long-distance trips', desc: 'Heading out of Bengaluru? Our outstation drivers are experienced on National Highways and familiar with popular routes to Mysuru, Coorg, Ooty, Chennai, and beyond.' },
+    { icon: '🏠', color: '#F58220', bg: '#FFF0E5', border: '#FCD5B5', name: 'Home Ride', tagline: 'Safe late-night home drop service', desc: 'Coming home late after an event or a long day? Our Home Ride service ensures you get back safely without the worry of driving fatigued or after celebrations.' },
+  ];
+
+  return `
+    <section class="pt-12 pb-10 bg-gradient-to-b from-[#FFF5EC] to-[#FFF9F5] border-b border-[#F5E6DA]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF0E5] border border-[#FCD5B5] text-[#D96B10] text-xs font-bold mb-4">
+          🗺️ All Trip Types
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-[#0A1329] mb-4">
+          Available <span class="gradient-text">Trip Types</span>
+        </h1>
+        <p class="text-[#3B4758] text-sm md:text-base font-medium max-w-2xl mx-auto">
+          JeeDrive supports 5 distinct trip categories across Bengaluru and beyond, each tailored to your specific travel needs.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 bg-[#FFF2E8]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+          ${trips.map(trip => `
+            <div class="glass-panel p-8 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-2xl border-[#FCE8D8]">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-5" style="background:${trip.bg}; border: 1px solid ${trip.border}">
+                ${trip.icon}
+              </div>
+              <div class="text-xs font-bold uppercase tracking-wider mb-1" style="color:${trip.color}">${trip.tagline}</div>
+              <h3 class="text-xl font-extrabold text-[#0A1329] mb-3">${trip.name}</h3>
+              <p class="text-sm text-[#3B4758] leading-relaxed">${trip.desc}</p>
+            </div>
+          `).join('')}
+
+          <div class="glass-panel p-8 bg-gradient-to-br from-[#0A1329] to-[#0F2040] text-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-2xl border-[#1E3A5F] flex flex-col items-start justify-between">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider mb-2 text-[#F58220]">Ready to Ride?</div>
+              <h3 class="text-xl font-extrabold mb-3">Book Your First JeeDrive Today</h3>
+              <p class="text-sm text-slate-300 leading-relaxed">Download the JeeDrive app and get started in minutes. Background-verified drivers, transparent pricing.</p>
+            </div>
+            <a href="tel:${SUPPORT_PHONE_NUMBER}" class="mt-6 btn-orange text-xs py-2.5 px-5">
+              📞 Contact Support
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    ${renderPublicFooter()}
+  `;
+}
+
+// ─────────────────────────────────────────────────
+// PAGE: BECOME A DRIVER
+// ─────────────────────────────────────────────────
+function renderPageBecomeADriver() {
+  const steps = [
+    { num: '01', title: 'Download the JeeDrive App', desc: 'Available on Android. Search "JeeDrive" on the Play Store and install the official app.' },
+    { num: '02', title: 'Register Your Profile', desc: 'Fill in your full name, mobile number, address, PIN code, and locality information in the registration form.' },
+    { num: '03', title: 'Upload Your Documents', desc: 'Submit your Driving Licence, Aadhaar, and PAN for verification. All documents are securely stored.' },
+    { num: '04', title: 'Admin Verification &amp; Approval', desc: 'Our admin team reviews your profile and documents. You receive your verified JeeDrive Driver ID upon approval.' },
+    { num: '05', title: 'Start Accepting Rides', desc: 'Once approved, go online and start receiving ride requests based on your duty preferences and location.' },
+  ];
+
+  const requirements = [
+    'Valid Indian Driving Licence (LMV or higher)',
+    'Aadhaar Card for identity verification',
+    'PAN Card for financial verification',
+    'Active mobile number for OTP verification',
+    'Minimum 2 years of driving experience',
+    'Clean driving record without major violations',
+    'Ability to drive both Manual &amp; Automatic transmissions preferred',
+  ];
+
+  return `
+    <section class="pt-12 pb-10 bg-gradient-to-b from-[#FFF5EC] to-[#FFF9F5] border-b border-[#F5E6DA]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF0E5] border border-[#FCD5B5] text-[#D96B10] text-xs font-bold mb-4">
+          🚘 Join Our Network
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-[#0A1329] mb-4">
+          Become a <span class="gradient-text">JeeDrive</span> Partner
+        </h1>
+        <p class="text-[#3B4758] text-sm md:text-base font-medium max-w-2xl mx-auto">
+          Join our growing network of professional, verified chauffeurs in Bengaluru. Earn on your own schedule with full flexibility.
+        </p>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-24 bg-[#FFF2E8]">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+          <div>
+            <h2 class="text-2xl font-extrabold text-[#0A1329] mb-8">Registration <span class="gradient-text">Steps</span></h2>
+            <div class="space-y-5">
+              ${steps.map(step => `
+                <div class="flex items-start gap-5 p-5 bg-white rounded-2xl border border-[#FCE8D8] shadow-sm hover:shadow-md hover:border-[#F58220]/30 transition-all">
+                  <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-[#FFF0E5] border border-[#FCD5B5] flex items-center justify-center">
+                    <span class="font-black text-[#F58220] text-sm">${step.num}</span>
+                  </div>
+                  <div>
+                    <div class="font-bold text-[#0A1329] text-sm mb-1">${step.title}</div>
+                    <div class="text-xs text-[#3B4758] leading-relaxed">${step.desc}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="space-y-8">
+            <div class="glass-panel p-8 bg-white border-[#0556F3]/20 rounded-2xl">
+              <h2 class="text-2xl font-extrabold text-[#0A1329] mb-6">Requirements</h2>
+              <ul class="space-y-3">
+                ${requirements.map(req => `
+                  <li class="flex items-center gap-3 text-sm text-[#3B4758]">
+                    <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#F0F5FF] border border-[#C7DEFF] flex items-center justify-center text-[#0556F3] text-xs font-bold">✓</span>
+                    ${req}
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <div class="glass-panel p-8 bg-gradient-to-br from-[#0A1329] to-[#0F2040] text-white border-[#1E3A5F] rounded-2xl">
+              <h3 class="text-xl font-extrabold mb-3">Ready to Join?</h3>
+              <p class="text-slate-300 text-sm mb-6 leading-relaxed">
+                Download the JeeDrive app to begin your registration. Our support team is available to assist you through the process.
+              </p>
+              <a href="tel:${SUPPORT_PHONE_NUMBER}" class="btn-orange text-xs py-3 px-6 w-full justify-center">
+                📞 Call Driver Helpdesk
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    ${renderPublicFooter()}
+  `;
+}
+
+// ─────────────────────────────────────────────────
+// PAGE: PRIVACY POLICY
+// ─────────────────────────────────────────────────
+function renderPagePrivacyPolicy() {
+  return `
+    <section class="pt-12 pb-8 bg-gradient-to-b from-[#FFF5EC] to-[#FFF9F5] border-b border-[#F5E6DA]">
+      <div class="max-w-4xl mx-auto px-4 lg:px-8">
+        <button onclick="window.navigateToPage('overview')" class="inline-flex items-center gap-2 text-xs font-semibold text-[#0556F3] hover:text-[#0042B3] mb-6 transition-colors bg-transparent border-0 cursor-pointer">
+          ← Back to Home
+        </button>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F0F5FF] border border-[#C7DEFF] text-[#0556F3] text-xs font-bold mb-4">
+          🔒 Legal
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-[#0A1329] mb-2">Privacy Policy — JeeDrive</h1>
+        <p class="text-sm text-[#3B4758]"><strong>Effective Date:</strong> September 23, 2026</p>
+      </div>
+    </section>
+
+    <section class="py-12 bg-[#FFF9F5]">
+      <div class="max-w-4xl mx-auto px-4 lg:px-8">
+        <div class="glass-panel p-8 md:p-12 bg-white border-[#F5E6DA] rounded-3xl space-y-10 text-[#3B4758]">
+
+          <p class="text-sm leading-relaxed">
+            JeeDrive ("JeeDrive", "we", "our", or "us") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how JeeDrive collects, uses, stores, and protects information when you use the JeeDrive mobile application, website, and related services.
+          </p>
+          <p class="text-sm leading-relaxed">
+            By using JeeDrive, you agree to the practices described in this Privacy Policy.
+          </p>
+
+          <div class="space-y-4">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">1. Information We Collect</h2>
+            <p class="text-sm leading-relaxed">Depending on how you use JeeDrive, we may collect the following information:</p>
+
+            <h3 class="text-base font-bold text-[#0A1329] mt-4">Account Information</h3>
+            <ul class="list-disc list-inside text-sm space-y-1 ml-2">
+              <li>Full name</li>
+              <li>Mobile phone number</li>
+              <li>Email address</li>
+              <li>Account credentials</li>
+              <li>Profile information</li>
+            </ul>
+
+            <h3 class="text-base font-bold text-[#0A1329] mt-4">Driver Information</h3>
+            <p class="text-sm">Drivers may provide additional information required for registration and verification, including:</p>
+            <ul class="list-disc list-inside text-sm space-y-1 ml-2">
+              <li>Full name, mobile number, email address</li>
+              <li>Address, locality, and PIN code</li>
+              <li>Driving licence information</li>
+              <li>Aadhaar information, where required for verification</li>
+              <li>PAN information, where required</li>
+              <li>Driver type (manual/automatic) and duty preferences</li>
+            </ul>
+
+            <h3 class="text-base font-bold text-[#0A1329] mt-4">Usage Data</h3>
+            <ul class="list-disc list-inside text-sm space-y-1 ml-2">
+              <li>Trip details (origin, destination, type, fare)</li>
+              <li>App usage patterns and feature interaction data</li>
+              <li>Device and OS information for compatibility</li>
+              <li>Support ticket content and communication history</li>
+            </ul>
+
+            <h3 class="text-base font-bold text-[#0A1329] mt-4">Location Data</h3>
+            <p class="text-sm leading-relaxed">With your permission, JeeDrive may collect location data to match you with nearby drivers, track active rides, and improve service coverage in Bengaluru and surrounding regions.</p>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">2. How We Use Your Information</h2>
+            <p class="text-sm leading-relaxed">We use the information collected to:</p>
+            <ul class="list-disc list-inside text-sm space-y-1.5 ml-2">
+              <li>Provide, operate, and improve the JeeDrive platform</li>
+              <li>Verify driver identities and process registrations</li>
+              <li>Match car owners with available verified drivers</li>
+              <li>Calculate and display transparent fare estimates</li>
+              <li>Send ride confirmations, updates, and notifications</li>
+              <li>Respond to support queries and resolve disputes</li>
+              <li>Maintain admin audit logs for platform integrity</li>
+              <li>Comply with applicable Indian laws and regulations</li>
+            </ul>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">3. Data Sharing &amp; Disclosure</h2>
+            <p class="text-sm leading-relaxed">JeeDrive does not sell your personal data. We may share your information only in the following circumstances:</p>
+            <ul class="list-disc list-inside text-sm space-y-1.5 ml-2">
+              <li><strong>Between Users:</strong> Car owner contact information may be shared with the assigned driver for the purpose of completing the booked trip.</li>
+              <li><strong>Service Providers:</strong> We may use third-party cloud services (such as Supabase) to securely store and process data on our behalf.</li>
+              <li><strong>Legal Requirements:</strong> We may disclose information if required by law, court order, or governmental authority in India.</li>
+              <li><strong>Safety:</strong> We may share information to protect the rights, safety, and security of our users and the public.</li>
+            </ul>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">4. Data Storage &amp; Security</h2>
+            <p class="text-sm leading-relaxed">
+              Your data is stored securely in cloud infrastructure with industry-standard encryption. JeeDrive implements access controls, audit logging, and secure authentication to protect your information from unauthorized access, alteration, or disclosure.
+            </p>
+            <p class="text-sm leading-relaxed">
+              Driver documents including Aadhaar and PAN are stored in private, access-controlled storage and are only accessible to authorized JeeDrive admin personnel.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">5. Data Retention</h2>
+            <p class="text-sm leading-relaxed">
+              We retain your personal data for as long as your account is active or as needed to provide services. You may request deletion of your account and associated data by contacting us. Certain data may be retained as required by law or for legitimate business purposes such as dispute resolution or fraud prevention.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">6. Your Rights</h2>
+            <p class="text-sm leading-relaxed">You have the right to:</p>
+            <ul class="list-disc list-inside text-sm space-y-1.5 ml-2">
+              <li>Access the personal data we hold about you</li>
+              <li>Request correction of inaccurate information</li>
+              <li>Request deletion of your account and personal data</li>
+              <li>Withdraw consent for optional data collection (e.g., location)</li>
+              <li>Raise concerns about how your data is processed</li>
+            </ul>
+            <p class="text-sm mt-2">To exercise these rights, contact us at the information provided in Section 9.</p>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">7. Cookies &amp; Tracking</h2>
+            <p class="text-sm leading-relaxed">
+              The JeeDrive website may use essential cookies to maintain session state and improve functionality. We do not use tracking cookies or third-party advertising cookies. Your browser settings can be used to control cookie preferences.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">8. Changes to This Policy</h2>
+            <p class="text-sm leading-relaxed">
+              JeeDrive may update this Privacy Policy from time to time. When changes are made, we will revise the Effective Date at the top of this page. We encourage you to review this policy periodically to stay informed about how we are protecting your information.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <h2 class="text-xl font-extrabold text-[#0A1329]">9. Contact Us</h2>
+            <p class="text-sm leading-relaxed">
+              If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact JeeDrive Support:
+            </p>
+            <div class="p-5 bg-[#F0F5FF] rounded-2xl border border-[#C7DEFF] text-sm space-y-2">
+              <div><strong class="text-[#0A1329]">JeeDrive</strong> — Bengaluru, Karnataka, India</div>
+              <div>Phone: <a href="tel:${SUPPORT_PHONE_NUMBER}" class="text-[#0556F3] font-semibold hover:underline">${SUPPORT_PHONE_NUMBER}</a></div>
+              <div>Email: <span class="text-[#0556F3] font-semibold">support@jeedrive.in</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    ${renderPublicFooter()}
+  `;
+}
+
+// Route to correct public website page
+function renderPublicWebsite() {
+  switch (state.websitePage) {
+    case 'how-it-works': return renderPageHowItWorks();
+    case 'benefits': return renderPageBenefits();
+    case 'trip-types': return renderPageTripTypes();
+    case 'become-a-driver': return renderPageBecomeADriver();
+    case 'privacy-policy': return renderPagePrivacyPolicy();
+    default: return renderPageOverview();
+  }
+}
 
 // Secret Admin Login Form (Authenticates live against Supabase admin_users)
 function renderAdminLogin() {
@@ -1553,12 +1972,22 @@ window.handleLogoClick = function () {
 
 window.navigateTo = function (view) {
   state.currentView = view;
+  if (view === 'website') {
+    state.websitePage = 'overview';
+  }
   if (view === 'admin_panel' && !state.adminAuth.isAuthenticated) {
     state.currentView = 'admin_login';
   }
   if (state.currentView === 'admin_panel') {
     loadActiveTableData();
   }
+  renderApp();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.navigateToPage = function (pageId) {
+  state.currentView = 'website';
+  state.websitePage = pageId;
   renderApp();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -1714,6 +2143,10 @@ window.submitDeleteRecord = confirmDeleteRecord;
 
 // Initial App Boot
 document.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+  if (['privacy-policy', 'how-it-works', 'benefits', 'trip-types', 'become-a-driver', 'overview'].includes(hash)) {
+    state.websitePage = hash;
+  }
   renderApp();
   loadAllTablesData();
 });
