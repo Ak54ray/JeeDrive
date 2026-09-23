@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
+    { "source": "/privacy-policy/", "destination": "/privacy-policy.html" },
+    { "source": "/privacy", "destination": "/privacy-policy.html" },
+    { "source": "/privacy/", "destination": "/privacy-policy.html" }
+  ]
+}

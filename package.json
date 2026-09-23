@@ -4,7 +4,7 @@
   "description": "DriveMate Public Website & Secure Admin Panel",
   "main": "index.html",
   "scripts": {
-    "start": "python -m http.server 3000"
+    "start": "python -m http.server 3500"
   },
   "keywords": ["drivemate", "chauffeur", "on-demand-drivers", "bengaluru"],
   "author": "DriveMate Team",
