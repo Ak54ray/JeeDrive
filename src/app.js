@@ -52,7 +52,7 @@ const state = {
   // Auth State (Live Supabase Verification against public.admin_users)
   adminAuth: {
     isAuthenticated: false, // Verified live against Supabase admin_users table
-    userEmail: 'neembaba@drivemate.in',
+    userEmail: 'jeedrivee@gmail.com',
     username: 'NeemBaba',
     role: 'SUPER_ADMIN'
   },
@@ -371,11 +371,10 @@ function renderHeader() {
           <nav class="hidden md:flex items-center gap-1 font-semibold text-xs text-[#0A1329]">
             ${navLinks.map(link => `
               <a href="#" onclick="event.preventDefault(); window.navigateToPage('${link.id}');"
-                class="px-3 py-2 rounded-lg transition-all ${
-                  activePage === link.id
-                    ? 'bg-[#0556F3] text-white shadow-sm'
-                    : 'text-[#0A1329] hover:bg-[#F0F5FF] hover:text-[#0556F3]'
-                }">
+                class="px-3 py-2 rounded-lg transition-all ${activePage === link.id
+      ? 'bg-[#0556F3] text-white shadow-sm'
+      : 'text-[#0A1329] hover:bg-[#F0F5FF] hover:text-[#0556F3]'
+    }">
                 ${link.label}
               </a>
             `).join('')}
@@ -1021,7 +1020,7 @@ function renderAdminLogin() {
         <form onsubmit="window.handleAdminLogin(event);" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Username / Admin Email</label>
-            <input type="text" id="adminUsername" placeholder="e.g. NeemBaba" required
+            <input type="text" id="adminUsername" placeholder="e.g. Admin@123" required
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-xs focus:outline-none focus:border-[#0556F3] font-medium transition-colors">
           </div>
           <div>
@@ -1035,7 +1034,7 @@ function renderAdminLogin() {
         </form>
 
         <div class="text-center text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-          Supabase Table: <span class="font-mono text-[#0556F3] font-semibold">public.admin_users</span>
+          welcome to admin panel <span class="font-mono text-[#0556F3] font-semibold"></span>
         </div>
       </div>
     </div>
